@@ -7,6 +7,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const login = async (email, password) => {
@@ -96,7 +97,10 @@ export const AuthProvider = ({ children }) => {
           setUser(response.data);
         }
       } catch (error) {
+        console.error("Failed to load user:", error);
         logout();
+      } finally {
+        setLoading(false); // Set loading to false when done
       }
     };
     loadUser();
@@ -104,7 +108,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, resendVerification, logout }}
+      value={{ user, loading, login, register, resendVerification, logout }}
     >
       {children}
     </AuthContext.Provider>

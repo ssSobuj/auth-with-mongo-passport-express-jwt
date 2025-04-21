@@ -33,29 +33,16 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET,
 };
 
+// JWT Strategy (FIXED)
 passport.use(
-  new LocalStrategy(
-    {
-      usernameField: "email",
-    },
-    async (email, password, done) => {
-      try {
-        const user = await User.findOne({ email });
-        if (!user) return done(null, false, { message: "Incorrect email" });
-
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid)
-          return done(null, false, { message: "Incorrect password" });
-
-        // Add verification check
-        if (!user.isVerified) {
-          return done(null, false, { message: "Email not verified" });
-        }
-
-        return done(null, user);
-      } catch (error) {
-        return done(error);
-      }
+  new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
+    // <-- Changed to JwtStrategy
+    try {
+      const user = await User.findById(jwtPayload.sub);
+      if (!user) return done(null, false);
+      return done(null, user);
+    } catch (error) {
+      return done(error, false);
     }
-  )
+  })
 );

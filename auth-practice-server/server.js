@@ -12,9 +12,12 @@ const authRoutes = require("./routes/authRoutes");
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://auth-practice-client-nine.vercel.app",
+    ],
     credentials: true,
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -25,24 +28,19 @@ app.use(cookieParser());
 require("./config/passport");
 app.use(passport.initialize());
 // Async function to initialize server
+
+// Define routes before DB connection
+app.get("/api", (req, res) => {
+  res.send("Simple E-commerce Server Running!");
+});
+app.use("/api/auth", authRoutes);
+app.use(errorHandler);
+
 async function initializeServer() {
   try {
-    // Connect to DB first
     await connectDB();
     console.log("Database connected successfully");
 
-    // Set up routes after DB connection
-
-    app.get("/api", (req, res) => {
-      res.send("Simple E-commerce Server Running!");
-    });
-
-    app.use("/api/auth", authRoutes);
-
-    // Error handling
-    app.use(errorHandler);
-
-    // Start server only locally
     if (!process.env.VERCEL) {
       app.listen(port, () => {
         console.log(`Server running on port ${port}`);
