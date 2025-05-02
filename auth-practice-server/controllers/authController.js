@@ -66,7 +66,18 @@ exports.login = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     const user = await User.findOne({ verificationToken: req.query.token });
-    if (!user) return res.status(400).json({ error: "Invalid token" });
+
+    if (!user) {
+      // Check if user is already verified
+      const verifiedUser = await User.findOne({
+        email: req.query.email,
+        isVerified: true,
+      });
+      if (verifiedUser) {
+        return res.json({ message: "Email already verified" });
+      }
+      return res.status(400).json({ error: "Invalid token" });
+    }
 
     user.isVerified = true;
     user.verificationToken = undefined;

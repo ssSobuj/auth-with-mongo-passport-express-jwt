@@ -13,9 +13,13 @@ export default function ProtectedRoute({ children }) {
     }
   }, [user, loading, router]);
 
-  if (loading) {
-    return <div>Loading...</div>; // Show loading state
+  if (loading || !user) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
   }
 
-  return user ? children : null;
+  return children;
 }
